@@ -50,6 +50,13 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertInternalType('string', $fn($manioc)->getBar());
 	}
 	
+	/** @expectedException InvalidArgumentException */
+	public function testTheMaybeMethodShouldThrowWhenTheCallableIsIncompatibleWithPimple() {
+		$manioc = new \Manioc\Container();
+		
+		$manioc->maybe('Manioc\Tests\Foo', ['foobar']);
+	}
+	
 	public function testFactoriesCanBeWrappedByMaybe() {
 		$manioc = new \Manioc\Container();
 		
