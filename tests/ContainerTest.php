@@ -33,4 +33,8 @@ namespace Manioc\Tests;
 
 class ContainerTest extends \PHPUnit_Framework_TestCase {
 	
+	public function testManiocContainerIsAPimpleContainer() {
+		$manioc = new \Manioc\Container();
+		$this->assertInstanceOf('\Pimple\Container', $manioc);
+	}
 }
