@@ -37,4 +37,41 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 		$manioc = new \Manioc\Container();
 		$this->assertInstanceOf('\Pimple\Container', $manioc);
 	}
+	
+	public function testTheMaybeMethodShouldHelpWrapACallable() {
+		$manioc = new \Manioc\Container();
+		
+		$fn = $manioc->maybeFactory('Manioc\Tests\Foo', function($c) {
+			$this->assertInstanceOf('\Pimple\Container', $c);
+			//nothing!
+		});
+		
+		$this->assertNotEquals('Bar', $fn($manioc)->getBar());
+		$this->assertInternalType('string', $fn($manioc)->getBar());
+	}
+	
+	public function testFactoriesCanBeWrappedByMaybe() {
+		$manioc = new \Manioc\Container();
+		
+		$manioc['factory'] = $manioc->maybeFactory('Manioc\Tests\Foo', function($c) {
+			$this->assertInstanceOf('\Pimple\Container', $c);
+			return new Foo();
+		});
+		$this->assertEquals('Bar', $manioc['factory']->getBar());
+		
+		$manioc['factory'] = $manioc->maybeFactory('Manioc\Tests\Foo', function($c) {
+			$this->assertInstanceOf('\Pimple\Container', $c);
+			//nothing!
+		});
+		$this->assertNotEquals('Bar', $manioc['factory']->getBar());
+		$this->assertInternalType('string', $manioc['factory']->getBar());
+	}
+	
+}
+
+class Foo {
+	/** @return string */
+	public function getBar() {
+		return 'Bar';
+	}
 }

@@ -31,6 +31,53 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace Manioc;
 
+use \Maybe\Maybe;
+
 class Container extends \Pimple\Container {
 	
+	private $maybes = [];
+	
+	/**
+	 * Marks a callable as being a factory service, and wraps it with Maybe.
+	 *
+	 * @param string $classname The expected class or interface to wrap with Maybe
+	 * @param callable $callable A service definition to be used as a factory
+	 *
+	 * @return callable The passed callable augmented with Maybe
+	 *
+	 * @throws \InvalidArgumentException Service definition has to be a closure of an invokable object
+	 */
+	public function maybeFactory($classname, $callable) {
+		
+		return $this->factory($this->maybe($classname, $callable));
+	}
+	
+	/**
+	 * Helper method. Wraps a callable with Maybe
+	 * 
+	 * @param string $classname The expected class or interface to wrap with Maybe
+	 * @param callable $callable A service definition
+	 * 
+	 * @return callable The passed callable augmented with Maybe
+	 */ 
+	public function maybe($classname, $callable) {
+		// This test comes directly from Pimple
+		if (!is_object($callable) || !method_exists($callable, '__invoke')) {
+			throw new \InvalidArgumentException(
+				'Service definition is not a Closure or invokable object.'
+			);
+		}
+		
+		return function ($c) use ($classname, $callable) {
+			$maybe = $this->getOrMakeMaybe($classname);
+			return $maybe->wrap(call_user_func($callable, $c));
+		};
+	}
+	
+	private function getOrMakeMaybe($classname) {
+		if (!isset($this->maybes[$classname])) {
+			$this->maybes[$classname] = new Maybe($classname);
+		}
+		return $this->maybes[$classname];
+	}
 }
