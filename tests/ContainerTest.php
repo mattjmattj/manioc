@@ -41,7 +41,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 	public function testTheMaybeMethodShouldHelpWrapACallable() {
 		$manioc = new \Manioc\Container();
 		
-		$fn = $manioc->maybeFactory('Manioc\Tests\Foo', function($c) {
+		$fn = $manioc->maybe('Manioc\Tests\Foo', function($c) {
 			$this->assertInstanceOf('\Pimple\Container', $c);
 			//nothing!
 		});
